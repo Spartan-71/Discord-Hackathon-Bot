@@ -5,20 +5,20 @@ from datetime import datetime
 from backend.schemas import Hackathon
 from pydantic import ValidationError
 
-def parse_unstop_dates(date_str: str):
+def parse_unstop_date(date_str: str):
     """
     Parses date strings from Unstop API like:
     - '2025-07-19T00:00:00+05:30'
     """
     if not date_str or not isinstance(date_str, str):
-        return None, None
+        return None
 
     try:
         # Parse ISO format datetime
         dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        return dt.date(), dt.date()
+        return dt.date()
     except (ValueError, TypeError):
-        return None, None
+        return None
 
 def fetch_unstop_hackathons() -> list[Hackathon]:
     """
@@ -66,7 +66,24 @@ def fetch_unstop_hackathons() -> list[Hackathon]:
             break
 
         for item in hackathon_data:
-            start_date, end_date = parse_unstop_dates(item.get("start_date"))
+            # Extract start and end dates with fallbacks
+            start_str = item.get("start_date")
+            if not start_str:
+                start_str = item.get("regnRequirements", {}).get("start_regn_dt")
+            
+            end_str = item.get("end_date")
+            if not end_str:
+                end_str = item.get("regnRequirements", {}).get("end_regn_dt")
+
+            start_date = parse_unstop_date(start_str)
+            end_date = parse_unstop_date(end_str)
+
+            # If start_date is missing but we have end_date, use end_date as start_date (or today?)
+            # Using end_date as start_date is safe to avoid validation error, 
+            # but ideally we want the real start date. 
+            # If both are None, it will be skipped by validation anyway.
+            if start_date is None and end_date is not None:
+                 start_date = end_date
             
             # Extract tags from filters
             tags = []
