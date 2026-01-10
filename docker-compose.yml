@@ -20,7 +20,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: ${DATABASE_URL}
     entrypoint: ["python", "-m", "fetch_and_store"]
 
   discord-bot:
@@ -30,7 +30,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: ${DATABASE_URL}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
     entrypoint: ["python", "bot.py"]
 
