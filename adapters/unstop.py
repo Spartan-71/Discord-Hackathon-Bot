@@ -101,7 +101,8 @@ def fetch_unstop_hackathons() -> list[Hackathon]:
                     mode=item.get("region"),
                     status="ongoing",
                     source="unstop",
-                    tags=tags
+                    tags=tags,
+                    banner_url=item.get("logoUrl2")
                 )
                 hackathons.append(hackathon)
             except ValidationError as e:

@@ -29,5 +29,5 @@ RUN uv pip install --system -e .
 COPY . .
 
 # Default Entrypoint
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "bot.py"]
 

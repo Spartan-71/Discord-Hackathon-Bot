@@ -13,6 +13,7 @@ class Hackathon(BaseModel):
     status: str
     source: str
     tags: List[str] = []
+    banner_url: str | None = None
 
     @field_validator("tags", mode="before")
     @classmethod

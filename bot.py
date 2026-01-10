@@ -61,7 +61,14 @@ client = MyClient(intents=intents)
 @client.tree.command(name="hi", description="Say hi")
 async def hi(interaction: discord.Interaction):
 
-    await interaction.response.send_message("yooo welcome sir ji!!!")
+    welcome_msg = (
+        "👋 **Hello there!**\n\n"
+        "I'm **HackRadar**, your personal hackathon assistant! 🚀\n"
+        "I can help you find the latest hackathons from **Devpost**, **MLH**, **Devfolio**, and more.\n\n"
+        "Use `/fetch` to manually check for new hackathons right now!\n"
+        "I also run in the background to keep you updated automatically. Happy Hacking! 💻✨"
+    )
+    await interaction.response.send_message(welcome_msg)
 
 
 @client.tree.command(name="fetch", description=
@@ -103,32 +110,25 @@ async def fetch(interaction: discord.Interaction):
         await interaction.followup.send(error_msg)
         logging.error(f"Error in manual fetch command: {e}")
 
-
 def format_hackathon_embed(hackathon):
     """Create a Discord embed for a hackathon notification."""
-    embed = discord.Embed(
-        title=f"🎉 New Hackathon: {hackathon.title}",
-        url=hackathon.url,
-        color=discord.Color.blue(),
-        timestamp=datetime.now()
-    )
-    
-    embed.add_field(name="📅 Start Date", value=hackathon.start_date.strftime("%B %d, %Y"))
-    embed.add_field(name="📅 End Date", value=hackathon.end_date.strftime("%B %d, %Y"))
-    embed.add_field(name="📍 Location", value=hackathon.location)
-    embed.add_field(name="💻 Mode", value=hackathon.mode)
-    embed.add_field(name="📊 Status", value=hackathon.status)
-    embed.add_field(name="🏷️ Source", value=hackathon.source)
-    
-    if hackathon.tags:
-        tags_str = ", ".join(hackathon.tags[:5])  # Limit to first 5 tags
-        if len(hackathon.tags) > 4:
-            tags_str += "..."
-        embed.add_field(name="🏷️ Tags", value=tags_str)
-    
-    embed.add_field(name="🔗 Link", value=f"[Visit Hackathon]({hackathon.url})",inline=True)
-    
-    return embed
+
+    # Plain markdown with bold keys and highlighted values
+    msg = f"## 🎉 New Hackathon: **{hackathon.title}**\n\n"
+    msg += f"---\n"
+    msg += f"**Duration:** {hackathon.start_date.strftime('%B %d')} - {hackathon.end_date.strftime('%B %d, %Y')}\n"
+    msg += f"**Location:** {hackathon.location}\n"
+    msg += f"**Mode:** {hackathon.mode}\n"
+    msg += f"**Status:** {hackathon.status}\n"
+    msg += f"---\n"
+    msg += f"**Register Here**: {hackathon.url}"
+
+    embed = None
+    if hackathon.banner_url:
+        embed = discord.Embed()
+        embed.set_image(url=hackathon.banner_url)
+
+    return msg, embed
 
 
 async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_channel=None):
@@ -143,8 +143,8 @@ async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_cha
         # Send to specific channel (for manual fetch command)
         for hackathon in new_hackathons:
             try:
-                embed = format_hackathon_embed(hackathon)
-                await target_channel.send(embed=embed)
+                msg, embed = format_hackathon_embed(hackathon)
+                await target_channel.send(msg, embed=embed)
                 logging.info(f"Sent notification for hackathon '{hackathon.title}' to channel {target_channel.id}")
             except Exception as e:
                 logging.error(f"Failed to send hackathon notification to channel {target_channel.id}: {e}")
@@ -170,8 +170,8 @@ async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_cha
             # Send notification for each new hackathon
             for hackathon in new_hackathons:
                 try:
-                    embed = format_hackathon_embed(hackathon)
-                    await channel.send(embed=embed)
+                    msg, embed = format_hackathon_embed(hackathon)
+                    await channel.send(msg, embed=embed)
                     logging.info(f"Sent notification for hackathon '{hackathon.title}' to guild {guild.id}")
                 except Exception as e:
                     logging.error(f"Failed to send hackathon notification in guild {guild.id}: {e}")

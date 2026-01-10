@@ -50,7 +50,8 @@ def fetch_dorahacks_hackathons() -> list[Hackathon]:
                 mode=mode,
                 status=status,
                 source="dorahacks",
-                tags=hack.get("field")
+                tags=hack.get("field"),
+                banner_url=hack.get("image_url"),
             )
             hackathons_data.append(hackathon)
         return hackathons_data

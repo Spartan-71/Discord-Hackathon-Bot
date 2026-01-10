@@ -27,7 +27,7 @@ def fetch_devfolio_hackathons():
                 title = item.get("name")
                 slug = item.get("slug")
                 url = f"https://{slug}.devfolio.co/" if slug else None
-                
+                banner_link = item.get("cover_img")
                 start_str = item.get("starts_at")
                 end_str = item.get("ends_at")
                 
@@ -70,10 +70,11 @@ def fetch_devfolio_hackathons():
                         url=url,
                         mode="Online" if item.get("is_online") else "Offline",
                         status=status,
-                        source="Devfolio"
+                        source="Devfolio",
+                        banner_url=banner_link
                     )
                     hackathons.append(hackathon)
-                    
+
             page += 1
             
         except requests.exceptions.RequestException as e:
@@ -84,5 +85,5 @@ def fetch_devfolio_hackathons():
 
 
 if __name__ == "__main__":
-    scarpe_devfolio_hackathons()
+    fetch_devfolio_hackathons()
 

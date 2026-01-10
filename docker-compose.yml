@@ -32,7 +32,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
-    entrypoint: ["python", "main.py"]
+    entrypoint: ["python", "bot.py"]
 
 volumes:
   db_data:

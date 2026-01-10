@@ -15,6 +15,8 @@ class HackathonDB(Base):
     status = Column(String,nullable=False)
     source = Column(String, nullable=False)
     tags = Column(Text, default="",nullable=True)
+    banner_url = Column(String, nullable=True)
+
 
     def __repr__(self):
         return f"<Hackathon(title='{self.title}', start_date='{self.start_date}')>"

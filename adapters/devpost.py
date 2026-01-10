@@ -1,8 +1,25 @@
 import requests
 import hashlib
+import json
+from bs4 import BeautifulSoup
 from datetime import datetime
 from backend.schemas import Hackathon
 from pydantic import ValidationError
+
+def get_banner_from_page(url: str) -> str | None:
+    if not url:
+        return None
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.content, "html.parser")
+        script = soup.find("script", type="application/ld+json")
+        if script:
+            data = json.loads(script.string)
+            return data.get("image")
+    except Exception as e:
+        print(f"Error fetching banner from {url}: {e}")
+    return None
 
 def parse_hackathon_dates(date_str: str):
     """
@@ -61,7 +78,8 @@ def fetch_devpost_hackathons() -> list[Hackathon]:
     Fetches and validates hackathon data from the first 20 pages of the official Devpost API.
     """
     hackathons = []
-    for page in range(1, 21):
+    for page in range(1, 4):
+        print(f"Fetching Devpost page {page}...")
         url = f"https://devpost.com/api/hackathons?page={page}"
         try:
             resp = requests.get(url)
@@ -91,6 +109,13 @@ def fetch_devpost_hackathons() -> list[Hackathon]:
             else:
                 location = "Everywhere"
 
+            hackathon_url = item.get("url")
+            banner_url = item.get("thumbnail_url")
+            if banner_url:
+                if banner_url.startswith("//"):
+                    banner_url = f"https:{banner_url}"
+                banner_url = banner_url.replace("medium_square", "original")
+            
             try:
                 hackathon = Hackathon(
                     id=hashlib.sha256(str(item.get("id")).encode()).hexdigest(),
@@ -102,13 +127,13 @@ def fetch_devpost_hackathons() -> list[Hackathon]:
                     mode=mode,
                     status=item.get("open_state"),
                     source="devpost",
-                    tags=[theme["name"] for theme in item.get("themes", [])]
+                    tags=[theme["name"] for theme in item.get("themes", [])],
+                    banner_url=banner_url
                 )
                 hackathons.append(hackathon)
             except ValidationError as e:
                 print(f"Skipping hackathon due to validation error: {item.get('title')}")
                 print(e)
-    print(f"Fetched {len(hackathons)} hackathons from devpost.")
     return hackathons
 
 if __name__ == "__main__":
