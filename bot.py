@@ -34,7 +34,7 @@ class MyClient(discord.Client):
 
     async def on_ready(self):
 
-        print(f'Bot is in {len(bot.guilds)} servers:')
+        print(f'Bot is in {len(self.guilds)} servers:')
         for guild in self.guilds:
             print(f'- {guild.name} (ID: {guild.id})')
             print(f'  Channels: {len(guild.text_channels)}')
