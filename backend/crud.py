@@ -23,6 +23,9 @@ def upsert_hackathon(db: Session, hack: Hackathon):
             db_obj.source = hack.source
             db_obj.tags = ",".join(hack.tags)
             db_obj.banner_url = hack.banner_url
+            db_obj.prize_pool = hack.prize_pool
+            db_obj.team_size = hack.team_size
+            db_obj.eligibility = hack.eligibility
             db.commit()
             return db_obj, False
         else:
@@ -39,6 +42,9 @@ def upsert_hackathon(db: Session, hack: Hackathon):
                 source=hack.source,
                 tags=",".join(hack.tags),
                 banner_url=hack.banner_url,
+                prize_pool=hack.prize_pool,
+                team_size=hack.team_size,
+                eligibility=hack.eligibility
             )
             db.add(db_obj)
             db.commit()
