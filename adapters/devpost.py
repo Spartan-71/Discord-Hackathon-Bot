@@ -73,6 +73,30 @@ def parse_hackathon_dates(date_str: str):
         # print(f"Error parsing date '{date_str}': {e}")
         return None, None
 
+def format_devpost_prizes(item):
+    """Format prize info into a vertical list."""
+    prizes = []
+    
+    # Total amount
+    if item.get("prize_amount"):
+        total = BeautifulSoup(item.get("prize_amount", ""), "html.parser").get_text().strip()
+        prizes.append(f"- Total: {total}")
+        
+    # Counts
+    counts = item.get("prizes_counts", {})
+    cash = counts.get("cash", 0)
+    other = counts.get("other", 0)
+    
+    if cash:
+        prizes.append(f"- {cash} Cash Prize(s)")
+    if other:
+        prizes.append(f"- {other} Other Prize(s)")
+        
+    if not prizes:
+        return "See details"
+        
+    return "\n".join(prizes)
+
 def fetch_devpost_hackathons() -> list[Hackathon]:
     """
     Fetches and validates hackathon data from the first 20 pages of the official Devpost API.
@@ -128,7 +152,10 @@ def fetch_devpost_hackathons() -> list[Hackathon]:
                     status=item.get("open_state"),
                     source="devpost",
                     tags=[theme["name"] for theme in item.get("themes", [])],
-                    banner_url=banner_url
+                    banner_url=banner_url,
+                    prize_pool=format_devpost_prizes(item),
+                    team_size="See details",
+                    eligibility="See details"
                 )
                 hackathons.append(hackathon)
             except ValidationError as e:

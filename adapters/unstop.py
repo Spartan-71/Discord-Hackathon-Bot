@@ -90,6 +90,35 @@ def fetch_unstop_hackathons() -> list[Hackathon]:
             for filter_item in item.get("filters", []):
                 if filter_item.get("type") == "category":
                     tags.append(filter_item.get("name", ""))
+            # Extract prizes
+            prize_pool = "See details"
+            prizes_data = item.get("prizes", [])
+            if prizes_data:
+                prize_list = []
+                for p in prizes_data:
+                    rank = p.get("rank", "")
+                    cash = p.get("cash", "")
+                    currency_icon = p.get("currency", "")
+                    
+                    currency = ""
+                    if "rupee" in currency_icon:
+                        currency = "₹"
+                    elif "dollar" in currency_icon:
+                        currency = "$"
+                    elif "euro" in currency_icon:
+                        currency = "€"
+                    
+                    if cash:
+                        prize_list.append(f"{rank}: {currency}{cash}")
+                    else:
+                        prize_list.append(f"{rank}")
+                
+                if prize_list:
+                    # Format as vertical list with bullet points
+                    prize_pool = "\n".join([f"- {p}" for p in prize_list[:3]])
+                    if len(prize_list) > 3:
+                        prize_pool += "\n- ..."
+
             try:
                 hackathon = Hackathon(
                     id=hashlib.sha256(str(item.get("title")).encode()).hexdigest(),
@@ -102,7 +131,10 @@ def fetch_unstop_hackathons() -> list[Hackathon]:
                     status="ongoing",
                     source="unstop",
                     tags=tags,
-                    banner_url=item.get("logoUrl2")
+                    banner_url=item.get("logoUrl2"),
+                    prize_pool=prize_pool,
+                    team_size=f"{item.get('regnRequirements', {}).get('min_team_size', 1)}-{item.get('regnRequirements', {}).get('max_team_size', 1)} members",
+                    eligibility=", ".join([f.get("name", "") for f in item.get("filters", []) if f.get("type") == "eligible"]) or "Open to all"
                 )
                 hackathons.append(hackathon)
             except ValidationError as e:

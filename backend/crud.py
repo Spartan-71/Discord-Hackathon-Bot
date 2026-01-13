@@ -38,7 +38,7 @@ def upsert_hackathon(db: Session, hack: Hackathon):
                 status=hack.status, 
                 source=hack.source,
                 tags=",".join(hack.tags),
-                banner_url=hack.banner_url
+                banner_url=hack.banner_url,
             )
             db.add(db_obj)
             db.commit()

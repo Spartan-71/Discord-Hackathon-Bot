@@ -16,6 +16,9 @@ class HackathonDB(Base):
     source = Column(String, nullable=False)
     tags = Column(Text, default="",nullable=True)
     banner_url = Column(String, nullable=True)
+    prize_pool = Column(String, nullable=True)
+    team_size = Column(String, nullable=True)
+    eligibility = Column(String, nullable=True)
 
 
     def __repr__(self):

@@ -70,6 +70,11 @@ class MyClient(discord.Client):
         except Exception as e:
             print(f"Failed to sync commands to {guild.name}: {e}")
 
+    async def on_interaction(self, interaction: discord.Interaction):
+        if interaction.type == discord.InteractionType.component:
+            if interaction.data.get("custom_id") == "set_reminder":
+                await interaction.response.send_message("🔔 Reminder set! (This feature is coming soon)", ephemeral=True)
+
 
 client = MyClient(intents=intents)
 
@@ -176,15 +181,40 @@ def format_hackathon_embed(hackathon):
     msg += f"**Location:** {hackathon.location}\n"
     msg += f"**Mode:** {hackathon.mode}\n"
     msg += f"**Status:** {hackathon.status}\n"
+    if hackathon.prize_pool:
+        if "\n" in hackathon.prize_pool or hackathon.prize_pool.startswith("-"):
+            msg += f"**Prizes:**\n{hackathon.prize_pool}\n"
+        else:
+            msg += f"**Prizes:** {hackathon.prize_pool}\n"
+    if hackathon.team_size:
+        msg += f"**Team Size:** {hackathon.team_size}\n"
+    if hackathon.eligibility:
+        msg += f"**Eligibility:** {hackathon.eligibility}\n"
     msg += f"---\n"
-    msg += f"**Register Here**: {hackathon.url}"
 
     embed = None
     if hackathon.banner_url:
         embed = discord.Embed()
         embed.set_image(url=hackathon.banner_url)
 
-    return msg, embed
+    view = discord.ui.View()
+
+    # Register button
+    if hackathon.url:
+        view.add_item(discord.ui.Button(
+            label="🚀 Register Now",
+            url=hackathon.url,
+            style=discord.ButtonStyle.link
+        ))
+
+    # Reminder button
+    view.add_item(discord.ui.Button(
+        label="🔔 Set Reminder",
+        style=discord.ButtonStyle.primary,
+        custom_id="set_reminder"
+    ))
+
+    return msg, embed, view
 
 
 async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_channel=None):
@@ -199,8 +229,8 @@ async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_cha
         # Send to specific channel (for manual fetch command)
         for hackathon in new_hackathons:
             try:
-                msg, embed = format_hackathon_embed(hackathon)
-                await target_channel.send(msg, embed=embed)
+                msg, embed, view = format_hackathon_embed(hackathon)
+                await target_channel.send(msg, embed=embed, view=view)
                 logging.info(f"Sent notification for hackathon '{hackathon.title}' to channel {target_channel.id}")
             except Exception as e:
                 logging.error(f"Failed to send hackathon notification to channel {target_channel.id}: {e}")
@@ -241,8 +271,8 @@ async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_cha
             # Send notification for each new hackathon
             for hackathon in new_hackathons:
                 try:
-                    msg, embed = format_hackathon_embed(hackathon)
-                    await channel.send(msg, embed=embed)
+                    msg, embed, view = format_hackathon_embed(hackathon)
+                    await channel.send(msg, embed=embed, view=view)
                     logging.info(f"Sent notification for hackathon '{hackathon.title}' to guild {guild.id}")
                 except Exception as e:
                     logging.error(f"Failed to send hackathon notification in guild {guild.id}: {e}")

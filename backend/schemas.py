@@ -14,6 +14,9 @@ class Hackathon(BaseModel):
     source: str
     tags: List[str] = []
     banner_url: str | None = None
+    prize_pool: str | None = None
+    team_size: str | None = None
+    eligibility: str | None = None
 
     @field_validator("tags", mode="before")
     @classmethod
