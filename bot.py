@@ -88,7 +88,7 @@ async def hi(interaction: discord.Interaction):
     """Say hi and introduce the bot."""
     embed = discord.Embed(
         title="👋 Hello! I'm HackRadar 🚀",
-        description="I'm your personal AI assistant for tracking hackathons! I monitor platforms like **Devpost**, **MLH**, and **Devfolio** to bring you the latest opportunities.",
+        description="I'm your personal AI assistant for tracking hackathons! I monitor platforms like **Unstop**, **Devpost**, **Devfolio** and many more to bring you the latest opportunities.",
         color=discord.Color.green()
     )
     
