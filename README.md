@@ -17,6 +17,7 @@ HackRadar is a **Discord Bot** that tracks upcoming hackathons from major platfo
 | Command | Description | Usage |
 | :--- | :--- | :--- |
 | `/hi` | Get a warm welcome and introduction to the bot. | `/hi` |
+| `/help` | View the full command guide with usage examples. | `/help` |
 | `/fetch` | Manually trigger a hackathon fetch update. Notifies the channel and subscribers if new events are found. | `/fetch` |
 | `/search` | Search for hackathons by keyword (e.g., "Python", "Web3"). | `/search keyword:AI` |
 | `/platform` | Get the latest hackathons from a specific platform. | `/platform name:devpost count:5` |
