@@ -5,10 +5,36 @@ HackRadar is a **Discord Bot** that tracks upcoming hackathons from major platfo
 ## 🚀 Features
 
 *   **Multi-Platform Scraping**: Supports MLH, Devpost, Devfolio, DoraHacks, and Unstop.
-*   **Real-time Notifications**: Automatically posts new hackathons to your Discord server.
-*   **Slash Commands**: Use `/fetch` to manually trigger updates.
-*   **Database**: Uses PostgreSQL to store hackathon data and prevent duplicate notifications.
+*   **Real-time Notifications**: Automatically posts new hackathons to your Discord server every 12 hours.
+*   **Personalized Subscriptions**: Users can subscribe to specific themes (e.g., "AI", "Blockchain") and receive DM alerts.
+*   **Powerful Slash Commands**: Search, filter by platform, and check upcoming events directly from Discord.
+*   **Rich Embeds**: Beautifully formatted messages with banners, prize details, and registration links.
+*   **Database**: Uses PostgreSQL to store hackathon data and user subscriptions.
 *   **Dockerized**: Easy deployment with Docker Compose.
+
+## 🤖 Commands
+
+| Command | Description | Usage |
+| :--- | :--- | :--- |
+| `/hi` | Get a warm welcome and introduction to the bot. | `/hi` |
+| `/fetch` | Manually trigger a hackathon fetch update. Notifies the channel and subscribers if new events are found. | `/fetch` |
+| `/search` | Search for hackathons by keyword (e.g., "Python", "Web3"). | `/search keyword:AI` |
+| `/platform` | Get the latest hackathons from a specific platform. | `/platform name:devpost count:5` |
+| `/upcoming` | List hackathons starting in the next X days. | `/upcoming days:14` |
+| `/subscribe` | Subscribe to DM notifications for a specific theme. | `/subscribe theme:Blockchain` |
+| `/unsubscribe` | Unsubscribe from a theme. | `/unsubscribe theme:Blockchain` |
+| `/set_channel` | **(Admin)** Set the default channel for automatic notifications. | `/set_channel channel:#hackathons` |
+
+## 🎨 Notification Format
+
+HackRadar sends visually rich notifications including:
+*   **Title**: Event name with a random fun emoji.
+*   **Details**: Duration, Location, Mode (Online/In-person), and Status.
+*   **Extras**: Prize Pool, Team Size, and Eligibility criteria (where available).
+*   **Visuals**: Event banner image.
+*   **Actions**:
+    *   `🚀 Check Details`: Direct link to the hackathon page.
+    *   `🔔 Set Reminder`: (Coming Soon) Personal reminder button.
 
 ## ⚡ Quick Start (Docker)
 
