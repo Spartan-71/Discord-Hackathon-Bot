@@ -14,7 +14,7 @@ from fetch_and_store import run as fetch_and_store_hackathons
 import backend.models
 from backend.models import GuildConfig, HackathonDB
 from backend.db import SessionLocal
-from backend.crud import search_hackathons, get_hackathons_by_platform, get_upcoming_hackathons
+from backend.crud import search_hackathons, get_hackathons_by_platform, get_upcoming_hackathons, subscribe_user, get_all_subscriptions, unsubscribe_user
 
 load_dotenv()
 
@@ -261,6 +261,47 @@ async def upcoming(interaction: discord.Interaction, days: int = 7):
     else:
         pass
 
+
+@client.tree.command(name="subscribe", description="Subscribe to hackathon notifications for a specific theme")
+@app_commands.describe(theme="The theme to subscribe to (e.g., AI, Blockchain)")
+async def subscribe(interaction: discord.Interaction, theme: str):
+    """Subscribe to a theme."""
+    await interaction.response.defer(ephemeral=True)
+    
+    db = SessionLocal()
+    try:
+        sub, is_new = subscribe_user(db, interaction.user.id, theme)
+        if is_new:
+            await interaction.followup.send(f"✅ You have successfully subscribed to **{theme}** updates!")
+        else:
+            await interaction.followup.send(f"ℹ️ You are already subscribed to **{theme}**.")
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error subscribing: {str(e)}")
+        logging.error(f"Error in subscribe command: {e}")
+    finally:
+        db.close()
+
+
+@client.tree.command(name="unsubscribe", description="Unsubscribe from hackathon notifications for a specific theme")
+@app_commands.describe(theme="The theme to unsubscribe from")
+async def unsubscribe(interaction: discord.Interaction, theme: str):
+    """Unsubscribe from a theme."""
+    await interaction.response.defer(ephemeral=True)
+    
+    db = SessionLocal()
+    try:
+        removed = unsubscribe_user(db, interaction.user.id, theme)
+        if removed:
+            await interaction.followup.send(f"✅ You have successfully unsubscribed from **{theme}** updates.")
+        else:
+            await interaction.followup.send(f"ℹ️ You were not subscribed to **{theme}**.")
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error unsubscribing: {str(e)}")
+        logging.error(f"Error in unsubscribe command: {e}")
+    finally:
+        db.close()
+
+
 def format_hackathon_embed(hackathon):
     """Create a Discord embed for a hackathon notification."""
 
@@ -372,6 +413,68 @@ async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_cha
         db.close()
 
 
+async def notify_subscribers(bot: MyClient, new_hackathons):
+    """
+    Check new hackathons against user subscriptions and send DMs.
+    """
+    if not new_hackathons:
+        return
+
+    db = SessionLocal()
+    try:
+        subscriptions = get_all_subscriptions(db)
+        if not subscriptions:
+            return
+
+        # Map: user_id -> list of hackathons to notify
+        user_notifications = {}
+
+        for hackathon in new_hackathons:
+            # Hackathon tags are list of strings in Pydantic model
+            hack_tags = [t.lower() for t in hackathon.tags] if hackathon.tags else []
+            
+            # Also check title or description if needed, but sticking to tags/themes as requested
+            # User might subscribe to "AI", we check if "ai" is in tags.
+            
+            for sub in subscriptions:
+                # Simple substring match or exact match? 
+                # User said "subscribe to a particular theme".
+                # If user subscribes to "AI", and tag is "Generative AI", should it match?
+                # Probably yes. ilike in DB usually does partial match if we used %%.
+                # Here we are doing in-memory check.
+                # Let's do: if sub.theme.lower() is in any of the tags (substring match within tags)
+                
+                theme_lower = sub.theme.lower()
+                is_match = False
+                for tag in hack_tags:
+                    if theme_lower in tag:
+                        is_match = True
+                        break
+                
+                if is_match:
+                    if sub.user_id not in user_notifications:
+                        user_notifications[sub.user_id] = []
+                    # Avoid duplicates if multiple themes match same hackathon
+                    if hackathon not in user_notifications[sub.user_id]:
+                        user_notifications[sub.user_id].append(hackathon)
+        
+        # Send DMs
+        for user_id, hacks in user_notifications.items():
+            try:
+                user = await bot.fetch_user(user_id)
+                if user:
+                    for hack in hacks:
+                        msg, embed, view = format_hackathon_embed(hack)
+                        await user.send(f"🔔 **New Hackathon Alert!** (Matches your subscription)\n", embed=embed, view=view)
+                        logging.info(f"Sent DM notification for '{hack.title}' to user {user_id}")
+            except Exception as e:
+                logging.error(f"Failed to DM user {user_id}: {e}")
+
+    finally:
+        db.close()
+
+
+
 @tasks.loop(hours=12)  # Run every 12 hours (adjust as needed: seconds=30, minutes=5, hours=12, etc.)
 async def check_and_notify_hackathons(bot: MyClient):
     """Background task that fetches hackathons and sends notifications for newly added ones."""
@@ -391,6 +494,10 @@ async def check_and_notify_hackathons(bot: MyClient):
         
         # Send notifications to all guilds
         await send_hackathon_notifications(bot, new_hackathons)
+
+        # Notify subscribers via DM
+        await notify_subscribers(bot, new_hackathons)
+
         
         logging.info("Completed hackathon notifications")
         

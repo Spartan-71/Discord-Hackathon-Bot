@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
-from backend.models import HackathonDB
+from backend.models import HackathonDB, UserSubscription
 from backend.schemas import Hackathon
 import logging
 
@@ -123,4 +123,58 @@ def get_upcoming_hackathons(db: Session, days: int = 7):
         return results
     except SQLAlchemyError as e:
         logging.error(f"Database error in get_upcoming_hackathons: {e}")
+        return []
+
+def subscribe_user(db: Session, user_id: int, theme: str):
+    """
+    Subscribe a user to a theme.
+    Returns (subscription_obj, is_new)
+    """
+    try:
+        # Normalize theme to lowercase for consistent matching? 
+        # The user didn't specify, but it's good practice. 
+        # However, tags in DB might be mixed case. 
+        # Let's store as provided but maybe lowercase for comparison?
+        # For now, store as provided.
+        
+        existing = db.query(UserSubscription).filter_by(user_id=user_id, theme=theme).first()
+        if existing:
+            return existing, False
+        
+        sub = UserSubscription(user_id=user_id, theme=theme)
+        db.add(sub)
+        db.commit()
+        db.refresh(sub)
+        return sub, True
+    except SQLAlchemyError as e:
+        db.rollback()
+        logging.error(f"Database error in subscribe_user: {e}")
+        raise
+
+def unsubscribe_user(db: Session, user_id: int, theme: str):
+    """
+    Unsubscribe a user from a theme.
+    Returns True if removed, False if not found.
+    """
+    try:
+        existing = db.query(UserSubscription).filter_by(user_id=user_id, theme=theme).first()
+        if existing:
+            db.delete(existing)
+            db.commit()
+            return True
+        return False
+    except SQLAlchemyError as e:
+        db.rollback()
+        logging.error(f"Database error in unsubscribe_user: {e}")
+        raise
+
+
+def get_all_subscriptions(db: Session):
+    """
+    Get all user subscriptions.
+    """
+    try:
+        return db.query(UserSubscription).all()
+    except SQLAlchemyError as e:
+        logging.error(f"Database error in get_all_subscriptions: {e}")
         return []

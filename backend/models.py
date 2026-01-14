@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, Text
+from sqlalchemy import Column, String, Date, Text, Integer, BigInteger, TIMESTAMP, func, UniqueConstraint, Index
 from backend.db import Base
 
 
@@ -33,3 +33,20 @@ class GuildConfig(Base):
 
     def __repr__(self):
         return f"<GuildConfig(guild_id='{self.guild_id}', channel_id='{self.channel_id}')>"
+
+
+class UserSubscription(Base):
+    __tablename__ = "user_subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(BigInteger, nullable=False)
+    theme = Column(String(100), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'theme', name='unique_user_theme'),
+        Index('idx_user_subscriptions_user_id', 'user_id'),
+    )
+
+    def __repr__(self):
+        return f"<UserSubscription(user_id={self.user_id}, theme='{self.theme}')>"
