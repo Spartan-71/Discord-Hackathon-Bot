@@ -6,8 +6,9 @@ from adapters.devpost import fetch_devpost_hackathons
 from adapters.unstop import fetch_unstop_hackathons
 from adapters.dorahacks import fetch_dorahacks_hackathons
 from adapters.mlh import scrape_mlh_events
-from adapters.devfolio import scrape_devfolio_hackathons
-from adapters.kaggle import fetch_kaggle_competitions
+from adapters.devfolio import fetch_devfolio_hackathons
+from adapters.kaggle_adapter import fetch_kaggle_competitions
+from adapters.hack2skill import fetch_hack2skill_hackathons
 
 from backend.db import SessionLocal, Base, engine
 from backend.crud import upsert_hackathon
@@ -73,7 +74,9 @@ def run():
         ("Devpost", fetch_devpost_hackathons),
         ("Unstop", fetch_unstop_hackathons),
         ("DoraHacks", fetch_dorahacks_hackathons),
-        ("Devfolio", scrape_devfolio_hackathons),
+        ("Devfolio", fetch_devfolio_hackathons),
+        # ("Kaggle", fetch_kaggle_competitions)
+        ("Hack2Skill", fetch_hack2skill_hackathons)
     ]
     all_new_hackathons = []
     

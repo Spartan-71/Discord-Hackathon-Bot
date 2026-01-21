@@ -119,7 +119,7 @@ def fetch_hack2skill_hackathons(page: int = 1, records: int = 50) -> list[Hackat
                     url=url,
                     mode=mode.capitalize(),
                     status=status,
-                    source="Hack2Skill",
+                    source="hack2skill",
                     tags=tags,
                     banner_url=event.get("thumbnail"),
                     prize_pool="See event page",  # API doesn't provide prize info
@@ -128,7 +128,6 @@ def fetch_hack2skill_hackathons(page: int = 1, records: int = 50) -> list[Hackat
                 )
                 
                 hackathons.append(hackathon)
-                print(f"Fetched: {hackathon.title}")
                 
             except Exception as e:
                 print(f"Error processing event {event.get('title', 'Unknown')}: {e}")
