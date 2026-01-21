@@ -468,7 +468,46 @@ async def help(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed)
 
-
+@client.tree.command(name="about", description="Learn about HackRadar")
+async def about(interaction: discord.Interaction):
+    """Show information about the bot."""
+    embed = discord.Embed(
+        title="🚀 About HackRadar",
+        description=(
+            "HackRadar is an open-source Discord bot that aggregates hackathons "
+            "from multiple platforms and delivers personalized notifications.\n\n"
+            f"**Version:** 1.0.0\n"
+            f"**Servers:** {len(client.guilds):,}\n"
+            f"**Platforms:** Devfolio, Devpost, Unstop, DoraHacks, MLH, Hack2Skill and Kaggle\n"
+        ),
+        color=discord.Color.blue()
+    )
+    
+    
+    if client.user:
+        embed.set_thumbnail(url=client.user.display_avatar.url)
+    embed.set_footer(text="Made with 💙 by Spartan-71")
+    
+    # Add buttons
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(
+        label="⭐ Star on GitHub",
+        style=discord.ButtonStyle.link,
+        url="https://github.com/Spartan-71/Discord-Hackathon-Bot"
+    ))
+    view.add_item(discord.ui.Button(
+        label="🐛 Report Bug",
+        style=discord.ButtonStyle.link,
+        url="https://github.com/Spartan-71/Discord-Hackathon-Bot/issues"
+    ))
+    view.add_item(discord.ui.Button(
+        label="💬 Support Server",
+        style=discord.ButtonStyle.link,
+        url="https://discord.gg/3pM6yJBE"
+    ))
+    
+    await interaction.response.send_message(embed=embed, view=view)
+    
 def format_hackathon_embed(hackathon):
     """Create a Discord embed for a hackathon notification."""
 
