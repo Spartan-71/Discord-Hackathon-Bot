@@ -98,7 +98,7 @@ def fetch_devfolio_hackathons():
                         url=url,
                         mode="Online" if item.get("is_online") else "Offline",
                         status=status,
-                        source="Devfolio",
+                        source="devfolio",
                         banner_url=banner_link,
                         registation_link=registation_link,
                         prize_pool=prize_pool,

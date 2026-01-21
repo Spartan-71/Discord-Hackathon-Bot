@@ -65,7 +65,7 @@ def scrape_mlh_events() -> list[Hackathon]:
             url=link,
             mode=mode,
             status="Upcoming",
-            source="MLH",
+            source="mlh",
             prize_pool="See details",
             team_size="See details",
             eligibility="Student Only" # MLH is generally student focused
