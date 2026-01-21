@@ -10,7 +10,7 @@ class HackathonDB(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     location = Column(String,nullable=False)
-    url = Column(String, unique=True, nullable=False)
+    url = Column(String, nullable=False)
     mode = Column(String,nullable=False)
     status = Column(String,nullable=False)
     source = Column(String, nullable=False)
