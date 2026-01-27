@@ -45,12 +45,11 @@ class MyClient(discord.Client):
             check_and_notify_hackathons.start(self)
 
     async def on_ready(self):
-
-        print(f'Bot is in {len(self.guilds)} servers:')
+        logging.info(f"Logged on as {self.user}")
+        logging.info(f'Bot is in {len(self.guilds)} servers:')
         for guild in self.guilds:
-            print(f'- {guild.name} (ID: {guild.id})')
-            print(f'  Channels: {len(guild.text_channels)}')
-            print(f"Logged on as {self.user}")
+            logging.info(f'- {guild.name} (ID: {guild.id}) members: {guild.member_count}')
+            logging.info(f'  Channels: {len(guild.text_channels)}')
         
         # Sync commands globally only (supports both guild and user installs)
         try:
@@ -59,21 +58,20 @@ class MyClient(discord.Client):
                 try:
                     self.tree.clear_commands(guild=guild)
                     await self.tree.sync(guild=guild)
-                    print(f"Cleared guild-specific commands for {guild.name}")
                 except Exception as e:
-                    print(f"Failed to clear guild commands for {guild.name}: {e}")
+                    logging.error(f"Failed to clear guild commands for {guild.name}: {e}")
             
             # Sync globally (this supports both guild and user installs)
             synced_global = await self.tree.sync()
-            print(f"Synced {len(synced_global)} commands globally")
-            print("Commands are now available in both servers and DMs!")
+            logging.info(f"Synced {len(synced_global)} commands globally")
+            logging.info("Commands are now available in both servers and DMs!")
         except Exception as e:
-            print(f"Error syncing commands: {e}")
+            logging.error(f"Error syncing commands: {e}")
 
     async def on_guild_join(self, guild):
         """Send welcome message when joining a new guild."""
-        print(f"Joined new guild: {guild.name} ({guild.id})")
-        print(f"Commands are already available globally (no guild-specific sync needed)")
+        logging.info(f"Joined new guild: {guild.name} ({guild.id})")
+        logging.info(f"Commands are already available globally (no guild-specific sync needed)")
 
         # Send welcome message
         try:
@@ -123,7 +121,7 @@ class MyClient(discord.Client):
 
     async def on_guild_remove(self, guild):
         """Cleanup data when removed from a guild."""
-        print(f"Removed from guild: {guild.name} ({guild.id})")
+        logging.info(f"Removed from guild: {guild.name} ({guild.id})")
         try:
             db = SessionLocal()
             # Delete guild config
@@ -310,6 +308,13 @@ async def search(interaction: discord.Interaction, keyword: str):
     try:
         logging.info(f"Search query: {keyword} by user {interaction.user.id}")
         results = search_hackathons(db, keyword)
+    except Exception as e:
+        logging.error(f"Error searching hackathons: {e}")
+        await interaction.followup.send(
+            "❌ An error occurred while searching the database. Please try again later.",
+            ephemeral=True
+        )
+        return
     finally:
         db.close()
     
@@ -399,6 +404,13 @@ async def platform(interaction: discord.Interaction, name: str, count: int = 3):
     try:
         logging.info(f"Platform query: {name} by user {interaction.user.id}")
         results = get_hackathons_by_platform(db, name, count)
+    except Exception as e:
+        logging.error(f"Error fetching hackathons by platform: {e}")
+        await interaction.followup.send(
+            "❌ An error occurred while fetching hackathons. Please try again later.",
+            ephemeral=True
+        )
+        return
     finally:
         db.close()
     
@@ -486,6 +498,13 @@ async def upcoming(interaction: discord.Interaction, days: int = 7):
     db = SessionLocal()
     try:
         results = get_upcoming_hackathons(db, days)
+    except Exception as e:
+        logging.error(f"Error fetching upcoming hackathons: {e}")
+        await interaction.followup.send(
+            "❌ An error occurred while fetching upcoming hackathons. Please try again later.",
+            ephemeral=True
+        )
+        return
     finally:
         db.close()
     
@@ -928,73 +947,73 @@ async def send_hackathon_notifications(bot: MyClient, new_hackathons, target_cha
     else:
         # Send to all guilds (for scheduled task)
         db = SessionLocal()
-        
-        for guild in bot.guilds:
-            channel = None
-            platforms = ["all"]
-            themes = ["all"]
-            
-            # 1. Check for configured channel in DB
-            try:
-                config = db.query(GuildConfig).filter(GuildConfig.guild_id == str(guild.id)).first()
-                if config:
-                    # Check if notifications are paused
-                    if config.notifications_paused == "true":
-                        logging.info(f"Notifications are paused for guild {guild.id}. Skipping.")
-                        continue
-                    
-                    channel = guild.get_channel(int(config.channel_id))
-                    if channel and not channel.permissions_for(guild.me).send_messages:
-                        logging.warning(f"Configured channel {channel.id} in guild {guild.id} is not writable")
-                        channel = None
-                    
-                    if config.subscribed_platforms:
-                        platforms = config.subscribed_platforms.split(",")
-                    if config.subscribed_themes:
-                        themes = config.subscribed_themes.split(",")
-            except Exception as e:
-                logging.error(f"Error fetching guild config for {guild.id}: {e}")
-
-            if channel is None:
-                logging.warning(f"No configured notification channel found for guild {guild.id}. Skipping.")
-                continue
-
-            # Send notification for each new hackathon
-            for hackathon in new_hackathons:
-                # Filter by platform
-                if "all" not in platforms:
-                    if not any(p.lower() in hackathon.source.lower() for p in platforms):
-                        continue
+        try:
+            for guild in bot.guilds:
+                channel = None
+                platforms = ["all"]
+                themes = ["all"]
                 
-                # Filter by theme
-                if "all" not in themes:
-                    hack_tags = [t.lower() for t in hackathon.tags] if hackathon.tags else []
-                    # Check if any subscribed theme matches any hackathon tag
-                    # Using simple substring match
-                    match = False
-                    for theme in themes:
-                        theme_lower = theme.lower()
-                        for tag in hack_tags:
-                            if theme_lower in tag:
-                                match = True
-                                break
-                        if match:
-                            break
-                    
-                    if not match:
-                        continue
-
+                # 1. Check for configured channel in DB
                 try:
-                    msg, embed, view = format_hackathon_embed(hackathon)
-                    if embed:
-                        await channel.send(content=msg, embed=embed, view=view)
-                    else:
-                        await channel.send(content=msg, view=view)
-                    logging.info(f"Sent notification for hackathon '{hackathon.title}' to guild {guild.id}")
+                    config = db.query(GuildConfig).filter(GuildConfig.guild_id == str(guild.id)).first()
+                    if config:
+                        # Check if notifications are paused
+                        if config.notifications_paused == "true":
+                            logging.info(f"Notifications are paused for guild {guild.id}. Skipping.")
+                            continue
+                        
+                        channel = guild.get_channel(int(config.channel_id))
+                        if channel and not channel.permissions_for(guild.me).send_messages:
+                            logging.warning(f"Configured channel {channel.id} in guild {guild.id} is not writable")
+                            channel = None
+                        
+                        if config.subscribed_platforms:
+                            platforms = config.subscribed_platforms.split(",")
+                        if config.subscribed_themes:
+                            themes = config.subscribed_themes.split(",")
                 except Exception as e:
-                    logging.error(f"Failed to send hackathon notification in guild {guild.id}: {e}")
-        
-        db.close()
+                    logging.error(f"Error fetching guild config for {guild.id}: {e}")
+
+                if channel is None:
+                    logging.warning(f"No configured notification channel found for guild {guild.id}. Skipping.")
+                    continue
+
+                # Send notification for each new hackathon
+                for hackathon in new_hackathons:
+                    # Filter by platform
+                    if "all" not in platforms:
+                        if not any(p.lower() in hackathon.source.lower() for p in platforms):
+                            continue
+                    
+                    # Filter by theme
+                    if "all" not in themes:
+                        hack_tags = [t.lower() for t in hackathon.tags] if hackathon.tags else []
+                        # Check if any subscribed theme matches any hackathon tag
+                        # Using simple substring match
+                        match = False
+                        for theme in themes:
+                            theme_lower = theme.lower()
+                            for tag in hack_tags:
+                                if theme_lower in tag:
+                                    match = True
+                                    break
+                            if match:
+                                break
+                        
+                        if not match:
+                            continue
+
+                    try:
+                        msg, embed, view = format_hackathon_embed(hackathon)
+                        if embed:
+                            await channel.send(content=msg, embed=embed, view=view)
+                        else:
+                            await channel.send(content=msg, view=view)
+                        logging.info(f"Sent notification for hackathon '{hackathon.title}' to guild {guild.id}")
+                    except Exception as e:
+                        logging.error(f"Failed to send hackathon notification in guild {guild.id}: {e}")
+        finally:
+            db.close()
 
 
 async def notify_subscribers(bot: MyClient, new_hackathons):
