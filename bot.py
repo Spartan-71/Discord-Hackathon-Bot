@@ -612,7 +612,7 @@ async def setup_error(interaction: discord.Interaction, error: app_commands.AppC
         await interaction.response.send_message(f"❌ An error occurred: {str(error)}", ephemeral=True)
 
 
-@client.tree.command(name="searchh", description="Search hackathons by keywords.")
+@client.tree.command(name="search", description="Search hackathons by keywords.")
 @app_commands.allowed_installs(guilds=True, users=True)
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 @app_commands.describe(keyword="Search term (e.g.,AI, Blockchain, Data Science)")
@@ -677,7 +677,7 @@ async def search(interaction: discord.Interaction, keyword: str):
             await interaction.followup.send(f"⚠️ Error displaying hackathons. Found {len(results)} results but couldn't display them properly.", ephemeral=True)
 
 
-@client.tree.command(name="platformm", description="Get latest hackathons from a specific platform")
+@client.tree.command(name="platform", description="Get latest hackathons from a specific platform")
 @app_commands.allowed_installs(guilds=True, users=True)
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 @app_commands.describe(name="Platform name (e.g., unstop, devfolio)", count="Number of results to return (default 3)")
@@ -742,7 +742,7 @@ async def platform(interaction: discord.Interaction, name: str, count: int = 3):
             await interaction.followup.send(f"⚠️ Error displaying hackathons. Found {len(results)} results but couldn't display them properly.", ephemeral=True)
 
 
-@client.tree.command(name="upcomingg", description="Get hackathons starting in the next X days")
+@client.tree.command(name="upcoming", description="Get hackathons starting in the next X days")
 @app_commands.allowed_installs(guilds=True, users=True)
 @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
 @app_commands.describe(days="Number of days to look ahead (default 7)")
