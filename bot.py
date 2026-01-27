@@ -78,15 +78,8 @@ def format_hackathon_embed(hackathon):
         view.add_item(discord.ui.Button(
             label="🚀 Check Details",
             url=hackathon.url,
-            style=discord.ButtonStyle.link
+            style=discord.ButtonStyle.primary
         ))
-
-    # Reminder button
-    view.add_item(discord.ui.Button(
-        label="🔔 Set Reminder",
-        style=discord.ButtonStyle.primary,
-        custom_id="set_reminder"
-    ))
 
     return msg, embed, view
 
@@ -590,10 +583,6 @@ class MyClient(discord.Client):
         except Exception as e:
             logging.error(f"Failed to cleanup data for guild {guild.id}: {e}")
 
-    async def on_interaction(self, interaction: discord.Interaction):
-        if interaction.type == discord.InteractionType.component:
-            if interaction.data.get("custom_id") == "set_reminder":
-                await interaction.response.send_message("🔔 Reminder set! (This feature is coming soon)", ephemeral=True)
 
 client = MyClient(intents=intents)
 
