@@ -54,15 +54,15 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_PORT || 22 }}
+          port: ${{ secrets.EC2_PORT }}
           envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,IMAGE_TAG,EC2_APP_DIR
           script_stop: true
           script: |
             set -e
-            APP_DIR="${EC2_APP_DIR:-/home/ec2-user/hackradar}"
+            APP_DIR="${EC2_APP_DIR}"
             cd "$APP_DIR"
             docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
             export IMAGE_TAG="$IMAGE_TAG"
-            docker compose pull
-            docker compose up -d
-            docker image prune -f
+            sudo docker-compose pull
+            sudo docker-compose up -d
+            sudo docker image prune -f
