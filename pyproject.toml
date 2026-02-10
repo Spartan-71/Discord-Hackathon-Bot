@@ -19,8 +19,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pre-commit>=4.2.0",
     "pytest>=8.4.1",
+    "ruff>=0.12.8",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
