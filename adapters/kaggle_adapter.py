@@ -1,6 +1,8 @@
 import hashlib
 from datetime import datetime
 from dotenv import load_dotenv
+from kaggle.api.kaggle_api_extended import KaggleApi
+from backend.schemas import Hackathon
 
 # Load .env from the root directory
 # env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
@@ -23,9 +25,6 @@ load_dotenv()
 
 # if username:
 #     os.environ["KAGGLE_USERNAME"] = username
-
-from kaggle.api.kaggle_api_extended import KaggleApi
-from backend.schemas import Hackathon
 
 
 def fetch_kaggle_competitions() -> list[Hackathon]:
