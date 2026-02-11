@@ -56,7 +56,7 @@ HackRadar v1.0.0 is the first stable release of the Discord Hackathon Bot! This 
   - Prize pool, team size, and eligibility
   - Banner images
   - Direct registration links
-  
+
 - **Interactive Setup**: User-friendly setup wizard with dropdown menus for:
   - Platform selection (or default to all)
   - Theme selection (AI/ML, Blockchain, Web Development, etc.)
