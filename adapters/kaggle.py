@@ -1,6 +1,8 @@
 import hashlib
 from datetime import datetime
+
 from kaggle.api.kaggle_api_extended import KaggleApi
+
 from backend.schemas import Hackathon
 
 

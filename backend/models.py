@@ -1,15 +1,16 @@
 from sqlalchemy import (
-    Column,
-    String,
-    Date,
-    Text,
-    Integer,
-    BigInteger,
     TIMESTAMP,
-    func,
-    UniqueConstraint,
+    BigInteger,
+    Column,
+    Date,
     Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
 )
+
 from backend.db import Base
 
 
