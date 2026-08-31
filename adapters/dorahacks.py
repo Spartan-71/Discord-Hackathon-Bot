@@ -1,7 +1,9 @@
-import requests
 import hashlib
-from backend.schemas import Hackathon
 from datetime import datetime
+
+import requests
+
+from backend.schemas import Hackathon
 
 
 def fetch_dorahacks_hackathons() -> list[Hackathon]:

@@ -1,16 +1,17 @@
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from sqlalchemy.exc import SQLAlchemyError, OperationalError
-from adapters.devpost import fetch_devpost_hackathons
-from adapters.unstop import fetch_unstop_hackathons
-from adapters.dorahacks import fetch_dorahacks_hackathons
-from adapters.mlh import scrape_mlh_events
-from adapters.devfolio import fetch_devfolio_hackathons
-from adapters.hack2skill import fetch_hack2skill_hackathons
 
-from backend.db import SessionLocal, Base, engine
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
+
+from adapters.devfolio import fetch_devfolio_hackathons
+from adapters.devpost import fetch_devpost_hackathons
+from adapters.dorahacks import fetch_dorahacks_hackathons
+from adapters.hack2skill import fetch_hack2skill_hackathons
+from adapters.mlh import scrape_mlh_events
+from adapters.unstop import fetch_unstop_hackathons
 from backend.crud import upsert_hackathon
+from backend.db import Base, SessionLocal, engine
 
 Base.metadata.create_all(bind=engine)
 

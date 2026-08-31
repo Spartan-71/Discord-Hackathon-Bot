@@ -1,6 +1,6 @@
-from pydantic import BaseModel, field_validator
 from datetime import date
-from typing import List
+
+from pydantic import BaseModel, field_validator
 
 
 class Hackathon(BaseModel):
@@ -13,7 +13,7 @@ class Hackathon(BaseModel):
     mode: str
     status: str
     source: str
-    tags: List[str] = []
+    tags: list[str] = []
     banner_url: str | None = None
     prize_pool: str | None = None
     team_size: str | None = None

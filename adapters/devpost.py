@@ -1,10 +1,12 @@
-import requests
 import hashlib
 import json
-from bs4 import BeautifulSoup
 from datetime import datetime
-from backend.schemas import Hackathon
+
+import requests
+from bs4 import BeautifulSoup
 from pydantic import ValidationError
+
+from backend.schemas import Hackathon
 
 
 def get_banner_from_page(url: str) -> str | None:

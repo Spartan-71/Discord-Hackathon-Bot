@@ -1,8 +1,10 @@
-import cloudscraper
-from bs4 import BeautifulSoup
-from backend.schemas import Hackathon
 import hashlib
 from datetime import date
+
+import cloudscraper
+from bs4 import BeautifulSoup
+
+from backend.schemas import Hackathon
 
 
 def scrape_mlh_events() -> list[Hackathon]:

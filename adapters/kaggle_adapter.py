@@ -1,7 +1,9 @@
 import hashlib
 from datetime import datetime
+
 from dotenv import load_dotenv
 from kaggle.api.kaggle_api_extended import KaggleApi
+
 from backend.schemas import Hackathon
 
 # Load .env from the root directory
