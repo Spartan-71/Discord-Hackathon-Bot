@@ -1,10 +1,11 @@
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from backend.models import HackathonDB, UserSubscription, GuildConfig
-from backend.schemas import Hackathon
 import logging
-from datetime import timedelta
-from datetime import date
+from datetime import date, timedelta
+
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+from backend.models import GuildConfig, HackathonDB, UserSubscription
+from backend.schemas import Hackathon
 
 
 def upsert_hackathon(db: Session, hack: Hackathon):
