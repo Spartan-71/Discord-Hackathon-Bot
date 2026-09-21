@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import random
 
 import discord
@@ -7,21 +7,21 @@ from discord import app_commands
 from discord.ext import tasks
 from dotenv import load_dotenv
 
-from fetch_and_store import run as fetch_and_store_hackathons
-from backend.models import GuildConfig
-from backend.db import SessionLocal
 from backend.crud import (
-    search_hackathons,
+    get_all_subscriptions,
     get_hackathons_by_platform,
     get_upcoming_hackathons,
-    subscribe_user,
-    get_all_subscriptions,
     get_user_subscriptions,
-    unsubscribe_user,
-    update_guild_preferences,
     pause_notifications,
     resume_notifications,
+    search_hackathons,
+    subscribe_user,
+    unsubscribe_user,
+    update_guild_preferences,
 )
+from backend.db import SessionLocal
+from backend.models import GuildConfig
+from fetch_and_store import run as fetch_and_store_hackathons
 
 # 1. Configuration & Logging
 load_dotenv()
@@ -178,7 +178,7 @@ class SetupView(discord.ui.View):
             )
         except Exception as e:
             await interaction.response.send_message(
-                f"❌ Error saving preferences: {str(e)}", ephemeral=True
+                f"❌ Error saving preferences: {e!s}", ephemeral=True
             )
         finally:
             db.close()
@@ -644,9 +644,7 @@ async def setup_error(interaction: discord.Interaction, error: app_commands.AppC
             "❌ You need Administrator permissions to use this command.", ephemeral=True
         )
     else:
-        await interaction.response.send_message(
-            f"❌ An error occurred: {str(error)}", ephemeral=True
-        )
+        await interaction.response.send_message(f"❌ An error occurred: {error!s}", ephemeral=True)
 
 
 @client.tree.command(name="search", description="Search hackathons by keywords.")
@@ -954,7 +952,7 @@ async def subscribe(interaction: discord.Interaction, theme: str):
         else:
             await interaction.followup.send(f"ℹ️ You are already subscribed to **{theme}**.")
     except Exception as e:
-        await interaction.followup.send(f"❌ Error subscribing: {str(e)}")
+        await interaction.followup.send(f"❌ Error subscribing: {e!s}")
         logging.error(f"Error in subscribe command: {e}")
     finally:
         db.close()
@@ -978,7 +976,7 @@ async def unsubscribe(interaction: discord.Interaction, theme: str):
         else:
             await interaction.followup.send(f"ℹ️ You were not subscribed to **{theme}**.")
     except Exception as e:
-        await interaction.followup.send(f"❌ Error unsubscribing: {str(e)}")
+        await interaction.followup.send(f"❌ Error unsubscribing: {e!s}")
         logging.error(f"Error in unsubscribe command: {e}")
     finally:
         db.close()
@@ -1011,7 +1009,7 @@ async def subscriptions(interaction: discord.Interaction):
         embed.set_footer(text="💡 Use /unsubscribe [theme] to remove a subscription")
         await interaction.followup.send(embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"❌ Error fetching subscriptions: {str(e)}")
+        await interaction.followup.send(f"❌ Error fetching subscriptions: {e!s}")
         logging.error(f"Error in subscriptions command: {e}")
     finally:
         db.close()
@@ -1039,7 +1037,7 @@ async def pause(interaction: discord.Interaction):
             )
             await interaction.followup.send(embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"❌ Error pausing notifications: {str(e)}")
+        await interaction.followup.send(f"❌ Error pausing notifications: {e!s}")
         logging.error(f"Error in pause command: {e}")
     finally:
         db.close()
@@ -1052,9 +1050,7 @@ async def pause_error(interaction: discord.Interaction, error: app_commands.AppC
             "❌ You need Administrator permissions to use this command.", ephemeral=True
         )
     else:
-        await interaction.response.send_message(
-            f"❌ An error occurred: {str(error)}", ephemeral=True
-        )
+        await interaction.response.send_message(f"❌ An error occurred: {error!s}", ephemeral=True)
 
 
 @client.tree.command(name="resume", description="Resume hackathon notifications.")
@@ -1079,7 +1075,7 @@ async def resume(interaction: discord.Interaction):
             )
             await interaction.followup.send(embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"❌ Error resuming notifications: {str(e)}")
+        await interaction.followup.send(f"❌ Error resuming notifications: {e!s}")
         logging.error(f"Error in resume command: {e}")
     finally:
         db.close()
@@ -1092,9 +1088,7 @@ async def resume_error(interaction: discord.Interaction, error: app_commands.App
             "❌ You need Administrator permissions to use this command.", ephemeral=True
         )
     else:
-        await interaction.response.send_message(
-            f"❌ An error occurred: {str(error)}", ephemeral=True
-        )
+        await interaction.response.send_message(f"❌ An error occurred: {error!s}", ephemeral=True)
 
 
 @client.tree.command(name="help", description="View all available commands")

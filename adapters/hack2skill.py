@@ -1,6 +1,8 @@
-import requests
 import hashlib
 from datetime import datetime
+
+import requests
+
 from backend.schemas import Hackathon
 
 BASE_URL = "https://vision.hack2skill.com/api/v1/innovator/public/event/public-list"
