@@ -1,9 +1,11 @@
-import requests
-import json
 import hashlib
+import json
 from datetime import datetime
-from backend.schemas import Hackathon
+
+import requests
 from pydantic import ValidationError
+
+from backend.schemas import Hackathon
 
 
 def parse_unstop_date(date_str: str):
